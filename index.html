@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvish AI</title>
+
+<style>
+body{
+    margin:0;
+    background:#0b0b0b;
+    color:#00ffe1;
+    font-family:Arial, sans-serif;
+    text-align:center;
+}
+h1{margin-top:15px;}
+#status{color:#0f0;margin:8px;}
+#messages{
+    height:60vh;
+    overflow-y:auto;
+    padding:10px;
+    border-top:1px solid #333;
+    border-bottom:1px solid #333;
+}
+.msg-user{color:#fff;text-align:right;margin:5px;}
+.msg-ai{color:#00ffe1;text-align:left;margin:5px;}
+#controls{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    background:#111;
+    padding:10px;
+}
+button{
+    padding:10px 14px;
+    margin:4px;
+    background:#00ffe1;
+    border:none;
+    border-radius:5px;
+    font-weight:bold;
+}
+input{
+    padding:10px;
+    width:70%;
+    border-radius:5px;
+    border:none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>JARVISH AI</h1>
+<div id="status">SYSTEM ONLINE</div>
+
+<button onclick="unlockVoice()">🔊 Enable Voice</button>
+<button onclick="startListening()">🎤 Speak</button>
+
+<div id="messages"></div>
+
+<div id="controls">
+    <input id="userInput" placeholder="Type or speak command..." />
+    <button onclick="sendText()">Send</button>
+</div>
+
+<script>
+/* ---------- VOICE UNLOCK ---------- */
+let voiceUnlocked=false;
+function unlockVoice(){
+    const u=new SpeechSynthesisUtterance("Jarvish voice activated");
+    u.lang="hi-IN";
+    speechSynthesis.speak(u);
+    voiceUnlocked=true;
+    status.innerText="VOICE ENABLED";
+}
+
+/* ---------- SPEAK ---------- */
+function speak(text){
+    if(!voiceUnlocked) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="hi-IN";
+    speechSynthesis.speak(u);
+}
+
+/* ---------- SPEECH RECOGNITION ---------- */
+let recognition;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){
+    recognition=new SR();
+    recognition.lang="hi-IN";
+    recognition.onresult=e=>{
+        const text=e.results[0][0].transcript;
+        addUser(text);
+        respond(text);
+    };
+}
+function startListening(){ recognition.start(); }
+
+/* ---------- UI ---------- */
+function addUser(t){
+    let d=document.createElement("div");
+    d.className="msg-user";
+    d.innerText="You: "+t;
+    messages.appendChild(d);
+}
+function addAI(t){
+    let d=document.createElement("div");
+    d.className="msg-ai";
+    d.innerText="Jarvish: "+t;
+    messages.appendChild(d);
+}
+
+/* ---------- COMMANDS ---------- */
+function respond(text){
+    let t=text.toLowerCase();
+    let reply="माफ़ कीजिए, मैं समझ नहीं पाया।";
+
+    /* OPEN APPS / WEBSITES */
+    if(t.includes("open youtube")){ reply="यूट्यूब खोल रहा हूँ"; window.open("https://youtube.com","_blank"); }
+    else if(t.includes("open instagram")){ reply="इंस्टाग्राम खोल रहा हूँ"; window.open("https://instagram.com","_blank"); }
+    else if(t.includes("open facebook")){ reply="फेसबुक खोल रहा हूँ"; window.open("https://facebook.com","_blank"); }
+    else if(t.includes("open whatsapp")){ reply="व्हाट्सएप खोल रहा हूँ"; window.open("https://web.whatsapp.com","_blank"); }
+    else if(t.includes("open google")){ reply="गूगल खोल रहा हूँ"; window.open("https://google.com","_blank"); }
+    else if(t.includes("open gmail")){ reply="जीमेल खोल रहा हूँ"; window.open("https://mail.google.com","_blank"); }
+    else if(t.includes("open twitter")||t.includes("open x")){ reply="ट्विटर खोल रहा हूँ"; window.open("https://x.com","_blank"); }
+    else if(t.includes("open snapchat")){ reply="स्नैपचैट खोल रहा हूँ"; window.open("https://snapchat.com","_blank"); }
+    else if(t.includes("open amazon")){ reply="अमेज़न खोल रहा हूँ"; window.open("https://amazon.in","_blank"); }
+    else if(t.includes("open flipkart")){ reply="फ्लिपकार्ट खोल रहा हूँ"; window.open("https://flipkart.com","_blank"); }
+    else if(t.includes("open play store")){ reply="प्ले स्टोर खोल रहा हूँ"; window.open("https://play.google.com","_blank"); }
+    else if(t.includes("open maps")){ reply="गूगल मैप्स खोल रहा हूँ"; window.open("https://maps.google.com","_blank"); }
+    else if(t.includes("open chrome")){ reply="क्रोम खोल रहा हूँ"; window.open("https://google.com","_blank"); }
+    else if(t.includes("open calculator")){ reply="कैलकुलेटर खोल रहा हूँ"; window.open("https://www.google.com/search?q=calculator","_blank"); }
+
+    /* CALL */
+    else if(t.includes("call rahul")){ reply="राहुल को कॉल कर रहा हूँ"; window.location.href="tel:9876543210"; }
+
+    /* SYSTEM COMMANDS */
+    else if(t.includes("time")){ reply="अभी समय है "+new Date().toLocaleTimeString(); }
+    else if(t.includes("date")){ reply="आज की तारीख है "+new Date().toLocaleDateString(); }
+    else if(t.includes("battery")){ reply="मैं बैटरी लेवल नहीं देख सकता"; }
+    else if(t.includes("who are you")||t.includes("tum kaun ho")){ reply="मैं जार्विश हूँ, आपका AI असिस्टेंट"; }
+    else if(t.includes("hello")||t.includes("हेलो")){ reply="नमस्ते, मैं जार्विश हूँ"; }
+    else if(t.includes("thanks")||t.includes("धन्यवाद")){ reply="आपका स्वागत है"; }
+
+    addAI(reply);
+    speak(reply);
+}
+
+/* ---------- TEXT INPUT ---------- */
+function sendText(){
+    let t=userInput.value;
+    if(!t) return;
+    addUser(t);
+    respond(t);
+    userInput.value="";
+}
+</script>
+
+</body>
+</html>
